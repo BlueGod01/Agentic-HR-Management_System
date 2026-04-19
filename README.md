@@ -396,6 +396,56 @@ Traceable
 * Frontend hosting
 * WhatsApp API service (Green API)
 * Email service integration
+### High-Level Architecture
+                ┌──────────────────────────┐
+                │Frontend (Web)for employees│
+                │WhatsApp for employers    |
+                └──────────┬───────────────┘
+                           │
+                    HTTPS / API Gateway
+                           │
+        ┌──────────────────┴──────────────────┐
+        │                                     │
+┌───────────────┐                  ┌────────────────────┐
+│ Employee API  │                  │ Employer API       │
+│ (FastAPI)     │                  │ (FastAPI)          │
+└──────┬────────┘                  └─────────┬──────────┘
+       │                                     │
+       │                                     │
+       ▼                                     ▼
+┌───────────────┐                  ┌────────────────────┐
+│ LangGraph     │                  │ LangGraph          │
+│ Employee Agent│                  │ Employer Agent     │
+└──────┬────────┘                  └─────────┬──────────┘
+       │                                     │
+       └──────────────┬──────────────────────┘
+                      ▼
+            ┌────────────────────┐
+            │ Orchestration Bus  │
+            │ (Celery / Redis)   │
+            └────────┬───────────┘
+                     ▼
+        ┌────────────────────────────┐
+        │ Core Services Layer        │
+        │ - SQL Service (RLS)        │
+        │ - Policy RAG Service      │
+        │ - Email Service           │
+        │ - Alert Service           │
+        └──────────┬───────────────┘
+                   ▼
+        ┌────────────────────────────┐
+        │ Data Layer                 │
+        │ - PostgreSQL (Primary)     │
+        │ - Vector DB (FAISS/Pinecone)│
+        │ - Redis Cache              │
+        └──────────┬───────────────┘
+                   ▼
+        ┌────────────────────────────┐
+        │ External Integrations      │
+        │ - WhatsApp (Green API)     │
+        │ - Email SMTP / API         │
+        │ - Google LLM (Gemini)      │
+        └────────────────────────────┘
 
 ---
 
