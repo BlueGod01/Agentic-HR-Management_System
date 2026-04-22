@@ -1,482 +1,202 @@
 # 🧠 Agentic AI HR System
 
-A production-grade, secure, and scalable **Agentic AI-powered HR assistant** designed to streamline employee interactions, enforce strict data privacy, and automate HR workflows.
+A production-ready, secure, and scalable **Agentic AI-powered HR assistant** built with FastAPI, LangGraph, Google Gemini, React, and Docker.
 
-This system enables employees to interact with an intelligent assistant for HR-related queries while ensuring **zero data leakage**, **full employer control**, and **automated monitoring of suspicious activities**.
+![Python](https://img.shields.io/badge/python-3.11%2B-blue) ![FastAPI](https://img.shields.io/badge/FastAPI-0.100%2B-green) ![LangGraph](https://img.shields.io/badge/LangGraph-Agent-orange) ![React](https://img.shields.io/badge/React-20%2B-blueviolet) ![Google Gemini](https://img.shields.io/badge/Gemini_1.5-Flash-yellow) ![Docker](https://img.shields.io/badge/Docker-Production-blue)
 
----
+## Why This Project
 
-# 📚 Table of Contents
+Traditional HR systems often require employees to navigate complex portals to access simple information—such as leave balances or company policies—while placing a significant burden on HR teams to handle repetitive queries. This project addresses these inefficiencies by automating routine HR operations through a robust agentic workflow.
 
-* Overview
-* Key Features
-* System Architecture
-* Technology Stack
-* Data Access & Security Model
-* Agent Design (LangGraph)
-* Alerting & Monitoring System
-* WhatsApp Integration
-* Employer Experience  
-* Email Automation System
-* Business Advantages
-* Deployment Architecture
-* Future Enhancements
+The system enables employees to securely interact with an AI assistant to retrieve personalized information, including profile details, salary data, and organizational policies. At the same time, it empowers employers with automated daily alerts and seamless WhatsApp integration, enabling efficient monitoring and management of operations.
 
----
+Employers can interact with the system via both a web dashboard and WhatsApp. Through conversational commands on WhatsApp, they can generate email drafts, log employee violations, and query company policies. All generated emails are presented as drafts for review and approval before being sent, ensuring accuracy and control. The system also supports bulk communication, allowing employers to send messages to multiple employees in a single step directly from WhatsApp.
 
-# 📖 Overview
+In addition, the agentic system integrates directly with the company’s employee database, enabling dynamic data retrieval and intelligent decision-making. It can process user-defined queries and execute data-driven workflows at scale. For example, an employer can instruct the system to identify employees who have taken more than five sick leaves within a given month and automatically generate warning emails for review, significantly reducing manual effort and operational overhead.
 
-The Agentic AI HR System acts as a **centralized HR intelligence layer** that connects employees, employers, and HR databases through a secure conversational interface.
+Security and data governance are integral to the system. It ensures that all data is accessible only to authorized personnel, with strict role-based access control (RBAC) in place. Employee data remains restricted to the respective employee and authorized employer roles, ensuring privacy, security, and compliance.
 
-Employees can:
+## Tech Stack
 
-* Query personal HR data (salary, leave, profile)
-* Ask company policy questions
-* Receive instant, accurate responses
+| Layer | Technology |
+|---|---|
+| User Interface | React, Vite |
+| API & Backend | FastAPI, Python 3.11+ |
+| Orchestration | LangGraph, LangChain |
+| LLM Provider | Google Gemini Models (1.5 Flash / Pro) |
+| Database | SQLite (Dev) / PostgreSQL (Prod), SQLAlchemy |
+| External APIs | Green API (WhatsApp), SMTP (Email) |
+| Deployment | Docker, NGINX |
 
-Employers gain:
+## Architecture
 
-* Full visibility into employee interactions
-* Automated alerts on policy violations
-* Direct communication via WhatsApp and email
+![Architecture](https://via.placeholder.com/800x400?text=Insert+Architecture+Diagram+Here)
 
----
+## How It Works
 
-# 🚀 Key Features
+The system operates across distinct workflows, ensuring strict role-based access and data isolation.
 
-### 👨‍💼 Employee Experience
+### 1. Employee Workflow (LangGraph Agent)
+The employee agent uses **tool-based LangGraph** powered by Google Gemini:
+- **ReAct Loop**: The AI processes the user's message, checks the system prompt (which injects security rules), and decides which tools to call.
+- **Available Tools**: `get_my_profile()`, `get_my_salary()`, `get_my_leave_balance()`, `search_policy(query)`, `log_violation(description)`.
+- **Safety**: The agent refuses unauthorized queries. If an employee tries to access another's data, a violation is logged, and a WhatsApp alert is triggered for critical issues.
 
-* Secure login-based chatbot interface
-* Instant answers to HR queries
-* No dependency on HR teams for routine questions
+### 2. Employer Workflow (Dashboard & WhatsApp)
+- **Web Dashboard**: Employers have a dedicated dashboard to manage employees and view alerts.
+- **WhatsApp Integration**: Using Green API, employers can receive AI-generated daily summaries or send commands directly via WhatsApp (e.g., "send email to EMP001 about leave rejection")
+- **Email-Automation**: Employers can ask to send emails to employees. The LLM agent will write an email based on the query and ask for approval before sending it.
 
-### 🔐 Data Protection
+### 3. Security Architecture
+- **Auth**: JWT (access & refresh tokens) and bcrypt password hashing.
+- **Access Control**: Role-based (Employee, Employer, Admin) with data isolation (Employees only see their own data).
+- **Network Security**: NGINX rate limiting on API and chat endpoints, with the database accessible only via backend APIs (never directly by the LLM).
 
-* Strict employee-level data isolation
-* Read-only database access for AI
-* Backend-enforced access control
+## 💰 Cost Estimation (1,000 Requests/Month)
 
-### ⚠️ Smart Monitoring
+This architecture leverages Google's **Gemini 1.5 Flash** for tool-calling and reasoning, offering excellent performance at a minimal cost.
 
-* Detection of policy violations
-* Automated alert generation
-* Daily summaries sent to employer
+**Assumptions per HR Request:**
+- **Agentic Loop (avg. 2 iterations per turn)**: ReAct loops increase token usage as the model thinks, calls a tool, and observes the result. Estimated ~3,000 input tokens, ~500 output tokens per interaction.
+- **Total per request**: ~3,000 input tokens, ~500 output tokens.
 
-### 📩 Communication Automation
+**Option A: Gemini 1.5 Flash (Default & Highly Recommended)**
+- Input Cost: ~$0.075 per 1M tokens
+- Output Cost: ~$0.30 per 1M tokens
+- **Estimated Monthly Cost (1,000 requests):** **~$0.38 / month**
 
-* WhatsApp alerts to employer
-* AI-generated email drafting and sending
-* Employer-controlled outbound communication
+**Option B: Gemini 1.5 Pro (For extreme reasoning depth)**
+- Input Cost: ~$1.25 per 1M tokens
+- Output Cost: ~$5.00 per 1M tokens
+- **Estimated Monthly Cost (1,000 requests):** **~$6.25 / month**
 
----
+> *Conclusion: By utilizing Gemini 1.5 Flash, hosting a secure, multi-tool agentic HR assistant becomes incredibly cost-effective, easily scaling to thousands of interactions for less than a dollar.*
 
-# 🏗️ System Architecture
+## ⚠️ Limitations
 
-```
-Frontend (Web Chat UI)
-        ↓
-Authentication Layer (JWT / OAuth)
-        ↓
-Agent Orchestration (LangGraph)
-        ↓
-Backend API (Access Control Layer)
-        ↓
--------------------------------
-| Employee Database (SQL)     |
-| Policy Knowledge Base      |
-| Alerts & Logs Database     |
--------------------------------
-        ↓
-External Services:
-- WhatsApp API (Green API)
-- Email Service (SMTP / API)
-```
+- **WhatsApp API Restrictions**: The Green API integration requires scanning a QR code with a physical WhatsApp device and maintaining active connectivity. Unofficial WhatsApp APIs may face rate limits or temporary bans if message volume is exceedingly high.
+- **Email Rate Limits**: Standard Gmail SMTP (used in this project) is limited to 500 emails per day. For enterprise-scale deployments, a dedicated service like SendGrid or AWS SES is required.
 
----
+## 🚀 Future Improvements (Roadmap)
 
-## 🔁 Request Flow
+- [ ] **Multi-tenant SaaS Support**: Allow multiple companies to use the system in isolated environments.
+- [ ] **Vector Database Integration**: Add FAISS or Pinecone to support semantic search over large corporate policy documents.
+- [ ] **Slack / Teams Integration**: Expand chatbot accessibility beyond the web UI to popular corporate messaging apps.
+- [ ] **Voice-enabled Assistant**: Support voice commands and responses for accessibility and ease of use.
+- [ ] **Advanced Analytics**: Interactive dashboards for HR teams to visualize employee sentiment and query trends.
 
-1. Employee sends query via chatbot
-2. Authentication validates identity
-3. LangGraph agent interprets intent
-4. Backend enforces access control
-5. Safe data retrieval (read-only SQL)
-6. Response returned to user
-7. If violation detected → logged + alert triggered
+## Project Structure
 
----
-
-# 🧰 Technology Stack
-
-### Core Components
-
-* **Agent Framework:** LangGraph
-* **LLM Provider:** Google Models
-* **Backend:** FastAPI / Node.js
-* **Frontend:** React / Next.js
-
-### Data Layer
-
-* **Database:** Local SQL (PostgreSQL / MySQL)
-* **Vector Storage:** For policy documents
-
-### Integrations
-
-* **WhatsApp API:** Green API
-* **Email System:** SMTP / API-based service
-
----
-
-# 🔐 Data Access & Security Model
-
-### Read-Only AI Principle
-
-The AI system has **strict read-only access** to databases. It cannot modify any records.
-
-### Controlled Access Flow
-
-* AI **does not directly query the database**
-* All requests go through backend APIs
-* Backend enforces:
-
-  * Employee identity validation
-  * Row-level data filtering
-
----
-
-### 👤 Employee Data Isolation
-
-Each employee can only access:
-
-* Their own:
-
-  * Salary
-  * Leave balance
-  * Profile data
-
-Any attempt to access:
-
-* Other employee data
-* Aggregated company data
-
-➡️ Is immediately blocked and flagged
-
----
-
-### 🛡️ Employer & HR Control
-
-* Full ownership of all employee data
-* Control over:
-
-  * Data visibility rules
-  * Alert thresholds
-  * Communication permissions
-* Ability to monitor all interactions via logs and alerts
-
----
-
-# 🧠 Agent Design (LangGraph)
-
-The system uses a **tool-based agent architecture**:
-
-### Available Tools
-
-* `get_employee_profile(employee_id)`
-* `get_leave_balance(employee_id)`
-* `search_policy_documents(query)`
-* `log_violation(query, reason)`
-* `generate_email(content, recipient)`
-
----
-
-### Agent Responsibilities
-
-* Understand user intent
-* Decide which tool to call
-* Refuse unsafe or unauthorized queries
-* Trigger alerts when needed
-
----
-
-# ⚠️ Alerting & Monitoring System
-
-### Trigger Conditions
-
-Alerts are generated when:
-
-* Employee tries to access unauthorized data
-* Suspicious or repeated probing queries occur
-* Policy violations are detected
-
----
-
-### Alert Storage
-
-Alerts are stored in SQL database:
-
-* user_id
-* query
-* timestamp
-* violation_type
-* severity
-
----
-
-### Daily Alert Workflow
-
-1. Alerts collected throughout the day
-2. System aggregates and summarizes
-3. Summary prepared using AI
-4. Sent to employer via WhatsApp
-
----
-
-# 📲 WhatsApp Integration
-
-The system integrates with **Green API** to send real-time and scheduled alerts.
-
-### Capabilities
-
-* Daily alert summaries
-* Instant high-priority alerts
-* Employer notifications
-
----
-
-### Example Alert Message
-
-```
-HR AI Alert Summary:
-
-- 3 policy violations detected
-- User 102 attempted unauthorized salary access
-- User 205 queried restricted company data
-
-Action recommended.
+```text
+hr-ai-system/
+├── backend/
+│   ├── app/
+│   │   ├── api/v1/endpoints/     # Route handlers (auth, chat, employee, employer)
+│   │   ├── agents/               # LangGraph HR agents (employee, employer)
+│   │   ├── models/               # SQLAlchemy ORM models
+│   │   ├── services/             # Alert, email, WhatsApp services
+│   │   └── core/                 # Config, security, scheduler
+│   ├── migrations/               # Alembic database migrations
+│   ├── tests/                    # Pytest test suite
+│   ├── requirements.txt          # Python dependencies
+│   └── Dockerfile                # Backend Docker image
+├── frontend/
+│   └── src/
+│       ├── pages/                # React UI components (Login, Chat, Dashboard)
+│       └── store/                # Zustand state management
+├── docker/
+│   └── nginx.conf                # NGINX reverse proxy & rate limiting
+├── docker-compose.yml            # Multi-container orchestration
+├── scripts/                      # Setup, start, and deploy bash scripts
+└── .env.example                  # Environment variable template
 ```
 
----
+## Local Setup
 
-# 📧 Email Automation System
+### Prerequisites
+- Python 3.11+
+- Node.js 20+
+- A [Google Gemini API key](https://aistudio.google.com/app/apikey)
 
-### AI-Powered Email Generation
+### 1. Clone & Setup
+```bash
+git clone <your-repo-url>
+cd hr-ai-system
+bash scripts/setup_dev.sh
+```
 
-The system can:
+### 2. Environment Variables
+Copy the template and configure your keys:
+```bash
+cp .env.example .env
+```
+**Essential Variables in `.env`:**
+```env
+# REQUIRED:
+APP_SECRET_KEY=your_random_32_char_secret
+JWT_SECRET_KEY=your_random_32_char_secret
+GOOGLE_API_KEY=your_gemini_api_key_here
+DATABASE_URL=sqlite:///./sql_app.db # Dev default
 
-* Draft emails on behalf of employer/HR
-* Send emails to employees using stored email addresses
+# OPTIONAL (WhatsApp):
+GREEN_API_INSTANCE_ID=your_instance_id
+GREEN_API_TOKEN=your_token
+EMPLOYER_WHATSAPP_NUMBER=91XXXXXXXXXX
 
----
+# OPTIONAL (Email):
+SMTP_USERNAME=your_email@gmail.com
+SMTP_PASSWORD=your_gmail_app_password
+SMTP_FROM_EMAIL=your_email@gmail.com
+```
 
-### Use Cases
+### 3. Run Development Servers
+```bash
+bash scripts/start_dev.sh
+```
 
-* Policy updates
-* Warning messages
-* HR announcements
-* Individual employee communication
+| Service | URL |
+|---|---|
+| Employee UI | http://localhost:5173 |
+| API Docs | http://localhost:8000/docs |
+| Health Check | http://localhost:8000/health |
 
----
+### 4. Demo Credentials (auto-seeded)
+| Role | Email | Password |
+|---|---|---|
+| Employee | alice.johnson@company.com | Alice@123 |
+| Employer | employer@company.com | Employer@123 |
+| Admin | admin@company.com | Admin@123 |
 
-### Workflow
-1. Employer triggers action (via WhatsApp)
-2. AI generates email draft
-3. Draft is sent to employer for approval
-4. Employer reviews and confirms
-5. System sends email via configured service
-6. Email and action are logged in database
+## 🐳 Production Deployment
 
----
-Employer Experience
-📲 Conversational Control
+```bash
+# 1. Configure production .env (Set APP_ENV=production, update DATABASE_URL to PostgreSQL)
+cp .env.example .env
 
-The employer can directly interact with the system via:
+# 2. Deploy using Docker Compose
+bash scripts/deploy_docker.sh
 
-WhatsApp
-Admin dashboard
+# 3. Monitor Logs
+docker compose logs -f backend
+```
 
-Using natural language commands like:
+## 🔄 Useful Commands
 
-“Send an email to HR team about policy update”
-“Notify employee 102 about leave rejection”
-“Draft a warning email for late attendance”
-✉️ AI-Assisted Communication
-The AI generates professional, context-aware emails
-Ensures:
-Consistent tone
-Policy alignment
-Clear communication
-Eliminates the need to manually draft emails
-✅ Approval-First Workflow (Critical Safety Layer)
+**Run Tests:**
+```bash
+cd backend
+source venv/bin/activate
+pytest tests/ -v
+```
 
-The system follows a human-in-the-loop model:
+**Database Migrations (Alembic):**
+```bash
+cd backend
+source venv/bin/activate
+alembic revision --autogenerate -m "describe_your_change"
+alembic upgrade head
+```
 
-Employer gives instruction
-AI generates email draft
-Draft is sent to employer for review
-Employer can:
-Approve
-Edit
-Reject
-Only after approval:
-Email is sent to the recipient
-Action is logged in system
+## 📄 License
 
-➡️ No email is sent without explicit employer verification
-
-🔔 Real-Time Awareness
-
-Employer receives:
-
-Daily summaries of alerts
-Instant notifications for high-risk activity
-
-Delivered via WhatsApp using Green API
-
-🧭 Centralized Control
-
-Employer has full authority over:
-
-Employee data visibility
-Communication workflows
-Alert thresholds
-System behavior
-
-All interactions are:
-
-Logged
-Auditable
-Traceable
-
-
-# 💼 Business Advantages
-
-### ⚡ Efficiency Boost
-
-* Eliminates repetitive HR queries
-* Reduces HR workload significantly
-
----
-
-### 🧑‍💻 Employee Productivity
-
-* Instant answers without delays
-* No dependency on HR teams
-
----
-
-### 🔐 Data Security & Control
-
-* Employees only access their own data
-* Employer retains full control
-* Built-in compliance and monitoring
-
----
-
-### 📊 Transparency & Monitoring
-
-* Full audit trail of employee queries
-* Real-time visibility into system usage
-
----
-
-### 🤖 Automation at Scale
-
-* AI handles communication
-* Automated alerts and reporting
-* Scalable across large organizations
-
----
-
-# 🚀 Deployment Architecture
-
-### Environment Setup
-
-* Backend server (API + Agent)
-* Database server (SQL)
-* Frontend hosting
-* WhatsApp API service (Green API)
-* Email service integration
-### High-Level Architecture
-                ┌──────────────────────────┐
-                │Frontend (Web)for employees│
-                │WhatsApp for employers    |
-                └──────────┬───────────────┘
-                           │
-                    HTTPS / API Gateway
-                           │
-        ┌──────────────────┴──────────────────┐
-        │                                     │
-┌───────────────┐                  ┌────────────────────┐
-│ Employee API  │                  │ Employer API       │
-│ (FastAPI)     │                  │ (FastAPI)          │
-└──────┬────────┘                  └─────────┬──────────┘
-       │                                     │
-       │                                     │
-       ▼                                     ▼
-┌───────────────┐                  ┌────────────────────┐
-│ LangGraph     │                  │ LangGraph          │
-│ Employee Agent│                  │ Employer Agent     │
-└──────┬────────┘                  └─────────┬──────────┘
-       │                                     │
-       └──────────────┬──────────────────────┘
-                      ▼
-            ┌────────────────────┐
-            │ Orchestration Bus  │
-            │ (Celery / Redis)   │
-            └────────┬───────────┘
-                     ▼
-        ┌────────────────────────────┐
-        │ Core Services Layer        │
-        │ - SQL Service (RLS)        │
-        │ - Policy RAG Service      │
-        │ - Email Service           │
-        │ - Alert Service           │
-        └──────────┬───────────────┘
-                   ▼
-        ┌────────────────────────────┐
-        │ Data Layer                 │
-        │ - PostgreSQL (Primary)     │
-        │ - Vector DB (FAISS/Pinecone)│
-        │ - Redis Cache              │
-        └──────────┬───────────────┘
-                   ▼
-        ┌────────────────────────────┐
-        │ External Integrations      │
-        │ - WhatsApp (Green API)     │
-        │ - Email SMTP / API         │
-        │ - Google LLM (Gemini)      │
-        └────────────────────────────┘
-
----
-
-### Recommended Deployment
-
-* Docker-based microservices
-* Reverse proxy (NGINX)
-* Secure HTTPS endpoints
-* Role-based authentication system
-
----
-
-# 🔮 Future Enhancements
-
-* Role-based dashboards (HR/Admin)
-* Voice-enabled assistant
-* Slack / Teams integration
-* Advanced analytics & insights
-* Multi-tenant SaaS support
-
----
-
-# 📌 Conclusion
-
-This Agentic AI HR System provides a **secure, scalable, and intelligent solution** to modern HR challenges by combining:
-
-* Strong data governance
-* AI-driven automation
-* Real-time monitoring
-* Seamless employee experience
-
-It ensures that **employees get instant answers**, while **employers maintain full control and visibility**, making it a powerful tool for organizations of any size.
-
----
+MIT License - See LICENSE file for details.
