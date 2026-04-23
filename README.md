@@ -198,6 +198,3 @@ alembic revision --autogenerate -m "describe_your_change"
 alembic upgrade head
 ```
 
-## 📄 License
-
-MIT License - See LICENSE file for details.
