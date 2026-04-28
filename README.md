@@ -31,6 +31,7 @@ Security and data governance are integral to the system. It ensures that all dat
 ## Architecture
 
 <img width="32000" height="115250" alt="hr_system_architecture_all" src="https://github.com/user-attachments/assets/63364cfd-2aaf-4e7c-84a7-c2354b00bb98" />
+Open this architecture images in another window and zoom them for better understanding.
 
 
 ## How It Works
