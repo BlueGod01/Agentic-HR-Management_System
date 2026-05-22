@@ -1,4 +1,6 @@
-# 🧠 Agentic AI HR System
+#  Agentic AI HR System
+
+<img width="1536" height="1024" alt="ChatGPT Image May 23, 2026, 03_25_20 AM" src="https://github.com/user-attachments/assets/8c745941-0bf8-44de-be77-edf59f90c4b1" />
 
 A production-ready, secure, and scalable **Agentic AI-powered HR assistant** built with FastAPI, LangGraph, Google Gemini, React, and Docker.
 
